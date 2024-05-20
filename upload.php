@@ -189,7 +189,7 @@ function getDatas($arr_lines,$header){
         $account = $arr_lines[1];
         $amount = $arr_lines[2];
         $amount = intval($amount);
-        $amount = number_format($amount, 2, '.', ',');
+        $amount = number_format($amount /100, 2, '.', ',');
         $date_now = $arr_lines[3];
         $date = DateTime::createFromFormat('ymd', $date_now);
         $date_now = $date->format('Y-m-d');
