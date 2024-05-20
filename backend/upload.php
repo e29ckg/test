@@ -4,7 +4,6 @@ header("Access-Control-Allow-Methods: GET,HEAD,OPTIONS,POST,PUT");
 header("Access-Control-Allow-Headers: Content-Type, Accept");
 header("Content-Type: application/json; charset=utf-8");
 
-
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if (isset($_FILES['file']) && $_FILES['file']['error'] == 0) {
         $filename = $_FILES['file']['tmp_name'];
@@ -12,7 +11,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         // ตรวจสอบว่าเป็นไฟล์ .txt
         $fileinfo = pathinfo($_FILES['file']['name']);
         $name_mode = substr($_FILES['file']['name'], 0, 3); // DCT   MCL
-        
         
         if (isset($fileinfo['extension']) && strtolower($fileinfo['extension']) == 'txt') {
             // อ่านเนื้อหาภายในไฟล์
@@ -38,9 +36,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             }            
             
             $datas = array();
-            $header = getHeder($arr_lines[0]);
-
-
+            $header = getHeader($arr_lines[0]);
 
             foreach ($arr_lines as $index => $line) {
                 // แยกข้อมูลในบรรทัด
@@ -54,11 +50,22 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     }
                 }
 
-                if($index % 2 === 1) {
+                if ($index % 2 === 1) {
                     $datas[] = getDatas($arr_data, $header);
                 }
-                
             }
+
+            // ข้อมูลที่ต้องการส่งกลับ
+            http_response_code(200);
+            $data = array(
+                'status' => 'success',
+                'header' => $header,
+                'datas' => $datas,
+                'message' => 'Data received successfully'
+            );
+            echo json_encode($data);
+            exit();
+
         } else {
             http_response_code(200);
             $data = array(
@@ -87,19 +94,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     exit();
 }
 
-// ข้อมูลที่ต้องการส่งกลับ
-http_response_code(200);
-$data = array(
-    'status' => 'success',
-    'header' => $header,
-    'datas' => $datas,
-    'message' => 'Data received successfully'
-);
-echo json_encode($data);
-exit;
-
-
-function getHeder($arr_lines){
+function getHeader($arr_lines) {
     $version = null;
 
     $data = $arr_lines;
@@ -115,16 +110,14 @@ function getHeder($arr_lines){
     }
     
     $version = substr($arr_data[0], -3);
-    $coce_pf = substr($arr_data[0], 0,4);
+    $code_pf = substr($arr_data[0], 0, 4);
     $code = "";
     $debit_account = "";
     $court = "ศาลจังหวัดกาญจนบุรี";
     $amount = "";
     $date_now = "";
     
-    
-    
-    if ($version === "130" && $coce_pf === "HDCT") {
+    if ($version === "130" && $code_pf === "HDCT") {
         $code = $arr_data[0];
         $debit_account = $arr_data[2];
         $court = $arr_data[5];        
@@ -135,7 +128,7 @@ function getHeder($arr_lines){
         $date = DateTime::createFromFormat('ymd', $date_now);
         $date_now = $date->format('Y-m-d');
 
-    }elseif ($version === '130' && $coce_pf === "HMCL") {
+    } elseif ($version === '130' && $code_pf === "HMCL") {
         $code = $arr_data[0];
         $amount = $arr_data[2];
         $amount = substr($amount, 18, 19);
@@ -145,7 +138,7 @@ function getHeder($arr_lines){
         $date = DateTime::createFromFormat('d-m-Y', $date_now);
         $date_now = $date->format('Y-m-d');
 
-    }elseif ($version === '129') {
+    } elseif ($version === '129' && $code_pf === "HMCL") {
         $code = $arr_data[0];
         $amount = $arr_data[2];
         $amount = substr($amount, 18, 19);
@@ -154,27 +147,24 @@ function getHeder($arr_lines){
         $date_now = $arr_data[1];
         $date = DateTime::createFromFormat('d-m-Y', $date_now);
         $date_now = $date->format('Y-m-d');
-
     }
 
     return [
-        "status"=> "success",
-        "version"=> $version,
-        'coce_pf' => $coce_pf,
+        "status" => "success",
+        "version" => $version,
+        'code_pf' => $code_pf,
         'code' => $code,
-        'debit_account'=> $debit_account,
-        'amount'=> $amount,
-        'date_now'=> $date_now,
-        'court'=> $court,
-        // 'all'=> $arr_data,  
+        'debit_account' => $debit_account,
+        'amount' => $amount,
+        'date_now' => $date_now,
+        'court' => $court,
     ];    
+}
 
-};
-
-function getDatas($arr_lines,$header){
-    $code_pf = $header["coce_pf"];
+function getDatas($arr_lines, $header) {
+    $code_pf = $header["code_pf"];
     $version = $header["version"];
-
+    $codeH = $header["code"];
     $code = "";
     $account = "";
     $amount = "";
@@ -189,12 +179,12 @@ function getDatas($arr_lines,$header){
         $account = $arr_lines[1];
         $amount = $arr_lines[2];
         $amount = intval($amount);
-        $amount = number_format($amount /100, 2, '.', ',');
+        $amount = number_format($amount / 100, 2, '.', ',');
         $date_now = $arr_lines[3];
         $date = DateTime::createFromFormat('ymd', $date_now);
         $date_now = $date->format('Y-m-d');
-        $vendor_name = $arr_lines[4].' ' .$arr_lines[5];
-        $effective_date =  $arr_lines[6];
+        $vendor_name = $arr_lines[4] . ' ' . $arr_lines[5];
+        $effective_date = $arr_lines[6];
         $effective_date = substr($effective_date, 0, 6);
         $effective_date = DateTime::createFromFormat('ymd', $effective_date);
         $effective_date = $effective_date->format('Y-m-d');
@@ -202,7 +192,7 @@ function getDatas($arr_lines,$header){
         $bene_ref = substr($bene_ref, 9);
         $personal_id = substr($arr_lines[8], 0, 13);        
 
-    } else if ($version === "130"&& $code_pf === "HMCL"){
+    } else if ($version === "130" && $code_pf === "HMCL") {
         $code = $arr_lines[0];
         for ($i = 7; $i < count($arr_lines); $i++) {
             if (strlen($arr_lines[$i]) === 30) {
@@ -216,36 +206,37 @@ function getDatas($arr_lines,$header){
         $account = substr($account, 10, 10);
         $bene_ref = substr($bene_ref, 20);
         $amount = $arr_lines[1];
-        $amount = substr($amount,0,13);
+        $amount = substr($amount, 0, 13);
         $amount = intval($amount);
         $amount = number_format($amount, 2, '.', ',');
-        $vendor_name = substr($arr_lines[1],13). ' '.$arr_lines[2];
+        $vendor_name = substr($arr_lines[1], 13) . ' ' . $arr_lines[2];
         $personal_id = substr($personal_id, 0, 13);
 
-    }else if ($version === "129"&& $code_pf === "HMCL"){
+    } else if ($version === "129" && $code_pf === "HMCL") {
         $code = $arr_lines[0];
         for ($i = 7; $i < count($arr_lines); $i++) {
             if (strlen($arr_lines[$i]) === 30) {
                 $account = $arr_lines[$i];    
                 $bene_ref = $arr_lines[$i];    
             }    
-            if (strlen($arr_lines[$i]) === 20 || strlen($arr_lines[$i]) === 16 ) {
+            if (strlen($arr_lines[$i]) === 20 || strlen($arr_lines[$i]) === 16) {
                 $personal_id = $arr_lines[$i]; 
             }    
         }
         $account = substr($account, 10, 10);
         $bene_ref = substr($bene_ref, 20);
         $amount = $arr_lines[1];
-        $amount = substr($amount,0,13);
+        $amount = substr($amount, 0, 13);
         $amount = intval($amount);
         $amount = number_format($amount, 2, '.', ',');
-        $vendor_name = substr($arr_lines[1],13). ' '.$arr_lines[2];
+        $vendor_name = substr($arr_lines[1], 13) . ' ' . $arr_lines[2];
         $personal_id = substr($personal_id, 0, 13);
     }
 
-    return  [
-        "coce_pf" =>$code_pf,
-        "version" =>$version,
+    return [
+        "code_pf" => $code_pf,
+        "version" => $version,
+        "codeH" => $codeH,
         "code" => $code,
         "account" => $account,
         "amount" => $amount,
@@ -254,6 +245,7 @@ function getDatas($arr_lines,$header){
         "effective_date" => $effective_date,
         "bene_ref" => $bene_ref,
         "personal_id" => $personal_id,
-        "datas" =>$arr_lines,
+        // "datas" => $arr_lines,
     ];
-};
+}
+?>

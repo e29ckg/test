@@ -1,0 +1,9 @@
+RewriteEngine On
+RewriteBase /test/backend/
+
+# Rewrite URL สำหรับ financial_attorney_transactions ด้วย ID
+RewriteRule ^financial_attorney_transactions/([0-9]+)$ financial_attorney_transactions.php?id=$1 [L,QSA]
+
+# Rewrite URL สำหรับ financial_attorney_transactions ทั้งหมด
+RewriteRule ^financial_attorney_transactions$ financial_attorney_transactions.php [L,QSA]
+
