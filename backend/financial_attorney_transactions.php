@@ -20,6 +20,7 @@ switch ($request_method) {
         // กำหนดค่าเริ่มต้นสำหรับการแบ่งหน้า
         $page = isset($_GET['page']) ? intval($_GET['page']) : 1;
         $per_page = isset($_GET['per_page']) ? intval($_GET['per_page']) : 10;
+        
     
         // คำนวณค่า offset สำหรับ SQL Query
         $offset = ($page - 1) * $per_page;

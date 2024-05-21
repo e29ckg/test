@@ -50,6 +50,7 @@
                 
                 </ul>
                 <ul class="navbar-nav mb-2 mb-lg-0">
+                    
                     <li> 
                         <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#uploadModal" @click="uploadButton()">
                             Upload File
@@ -65,10 +66,10 @@
             <table id="data-table-main" class="table table-bordered table-striped mt-3">            
                 <thead>
                     <tr>
-                        <th colspan="10" class="text-center" id="h-court">Details</th>
+                        <th colspan="9" class="text-center" id="h-court">Details</th>
                     </tr>
                     <tr>
-                        <th>CodeH</th>
+                        <!-- <th>CodeH</th> -->
                         <th>Code</th>
                         <th>Account</th>
                         <th>Amount</th>
@@ -82,11 +83,11 @@
                 </thead>
                 <tbody class="text-sm-start">
 
-                    <tr v-for="(data, index) in datas" :key="index">
-                        <td class="col">
+                    <tr v-for="(data, index) in datas" :key="index">                        
+                        <!-- <td class="col">
                             <span v-if="!data.edit">{{data.codeH}}</span>
                             <input v-if="data.edit" type="text" class="form-control" v-model="data.codeH">
-                        </td>
+                        </td> -->
                         <td class="col">
                             <span v-if="!data.edit">{{data.code}}</span>
                             <input v-if="data.edit" type="text" class="form-control" v-model="data.code">
@@ -233,7 +234,8 @@
                 selectedFile: null,
                 rows: [],
                 header: {},
-                editMode:false
+                editMode:false,
+                searchQuery: ''
 
             },
             created() {
@@ -265,7 +267,7 @@
                 uploadButton(){
                     this.resetData()
                 },
-                async getDatas(page = 1, per_page = 25) {
+                async getDatas(page = 1, per_page = 10) {
                     try {
                         const response = await axios.get(`./backend/financial_attorney_transactions?page=${page}&per_page=${per_page}`);
 
@@ -401,6 +403,7 @@
                         this.$refs['response'].innerHTML = `<p class="text-danger">Error deleting data: ${error}</p>`;
                     }
                 }
+                
 
 
             }

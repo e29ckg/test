@@ -21,7 +21,7 @@ class FinancialAttorneyTransactions {
     public function __construct($db) {
         $this->conn = $db;
     }
-
+    
     // Read transactions with pagination
     public function readPaginated($offset, $per_page) {
         $query = "SELECT * FROM " . $this->table_name . " ORDER BY created DESC LIMIT ?, ?";
