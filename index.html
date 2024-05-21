@@ -67,9 +67,25 @@
                     </tr>
                 </thead>
                 <tbody>
+                    <tr v-for="(item, index) in datas" :key="index">
+                        <th>{{item.codeH}}CodeH</th>
+                        <th>{{item.code}}Code</th>
+                        <th>Account</th>
+                        <th>Amount</th>
+                        <th>Date</th>
+                        <th>Vendor Name</th>
+                        <th>Effective Date</th>
+                        <th>Bene Ref</th>
+                        <th>Personal ID</th>
+                    </tr>
                     
                 </tbody>
             </table>
+            <div>
+                <button @click="getDatas(pagination.prev_page)" :disabled="!pagination.prev_page">Previous</button>
+                <span>Page {{ pagination.current_page }} of {{ pagination.total_pages }}</span>
+                <button @click="getDatas(pagination.next_page)" :disabled="!pagination.next_page">Next</button>
+            </div>
         </section>
         
 
@@ -141,7 +157,7 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                        <button type="button" class="btn btn-primary" @click="uploadFile" data-bs-dismiss="modal">Upload</button>
+                        <button type="button" class="btn btn-primary" @click="uploadDatas()" data-bs-dismiss="modal">Upload</button>
                     </div>
                 </div>
             </div>
@@ -153,10 +169,22 @@
         new Vue({
             el: '#app',
             data: {
+                datas:[],
+                pagination: {
+            total: 0,
+            per_page: 10,
+            current_page: 1,
+            total_pages: 1,
+            next_page: null,
+            prev_page: null
+        },
                 selectedFile: null,
                 rows: [],
                 header: {}
 
+            },
+            created() {
+                this.getDatas()
             },
             methods: {
                 triggerFileInput() {
@@ -184,6 +212,22 @@
                 uploadButton(){
                     this.resetData()
                 },
+                async getDatas(page = 1, per_page = 10) {
+                    try {
+                        const response = await axios.get(`./backend/financial_attorney_transactions?page=${page}&per_page=${per_page}`);
+
+                        const data = response.data;
+                        if (data.records) {
+                            this.datas = data.records;
+                            this.pagination = data.pagination;
+                        } else {
+                            this.$refs['response'].innerHTML = `<p class="text-danger">${data.message}</p>`;
+                        }
+                    } catch (error) {
+                        this.$refs['response'].innerHTML = `<p class="text-danger">Error fetching data: ${error}</p>`;
+                    }
+                },
+
                 async uploadFile() {
                     if (!this.selectedFile) {
                         alert('Please select a file first.');
@@ -208,6 +252,27 @@
                             this.header = data.header;
                             this.rows = data.datas;
                             this.$refs['response'].innerHTML = '<p class="text-success">Data received successfully</p>';
+                        } else {
+                            this.$refs['response'].innerHTML = `<p class="text-danger">${data.message}</p>`;
+                        }
+                    } catch (error) {
+                        this.$refs['response'].innerHTML = `<p class="text-danger">Error uploading file: ${error}</p>`;
+                    }
+                },
+                async uploadDatas() {
+                    if (!this.rows) {
+                        alert('rows.');
+                        return;
+                    }                    
+
+                    try {
+                        const response = await axios.post('./backend/financial_attorney_transactions', 
+                            this.rows
+                        );
+
+                        const data = response.data;
+                        if (data.status === 'success') {
+                            this.$refs['response'].innerHTML = '<p class="text-success">Data Insert successfully</p>';
                         } else {
                             this.$refs['response'].innerHTML = `<p class="text-danger">${data.message}</p>`;
                         }
