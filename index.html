@@ -6,8 +6,10 @@
     <title>Upload and Read Text File</title>
     <link href="./css/bootstrap.min.css" rel="stylesheet">
     <link href="./css/font_sarabun.css" rel="stylesheet">    
+    <link href="./node_modules/sweetalert2/dist/sweetalert2.min.css" rel="stylesheet">
     <script src="./js/vue.min.js"></script>
     <script src="./js/axios.min.js"></script>
+    <script src="./node_modules/sweetalert2/dist/sweetalert2.min.js"></script>
     <style>
         body {
             font-family: 'Sarabun', sans-serif;
@@ -22,6 +24,16 @@
         }
         .drag-drop.dragging {
             background-color: #f7f7f7;
+        }
+        td{
+            font-size: 12px;
+        }
+        .form-control {
+            font-size: 12px;
+        }
+        table {
+            table-layout: fixed;
+            width: 50px;
         }
     </style>
 </head>
@@ -49,10 +61,11 @@
             </div>
         </nav>
         <section>
+            
             <table id="data-table-main" class="table table-bordered table-striped mt-3">            
                 <thead>
                     <tr>
-                        <th colspan="9" class="text-center" id="h-court">Details</th>
+                        <th colspan="10" class="text-center" id="h-court">Details</th>
                     </tr>
                     <tr>
                         <th>CodeH</th>
@@ -61,22 +74,57 @@
                         <th>Amount</th>
                         <th>Date</th>
                         <th>Vendor Name</th>
-                        <th>Effective Date</th>
+                        <th >Effective Date</th>
                         <th>Bene Ref</th>
                         <th>Personal ID</th>
+                        <th>Action</th>
                     </tr>
                 </thead>
-                <tbody>
-                    <tr v-for="(item, index) in datas" :key="index">
-                        <th>{{item.codeH}}CodeH</th>
-                        <th>{{item.code}}Code</th>
-                        <th>Account</th>
-                        <th>Amount</th>
-                        <th>Date</th>
-                        <th>Vendor Name</th>
-                        <th>Effective Date</th>
-                        <th>Bene Ref</th>
-                        <th>Personal ID</th>
+                <tbody class="text-sm-start">
+
+                    <tr v-for="(data, index) in datas" :key="index">
+                        <td class="col">
+                            <span v-if="!data.edit">{{data.codeH}}</span>
+                            <input v-if="data.edit" type="text" class="form-control" v-model="data.codeH">
+                        </td>
+                        <td class="col">
+                            <span v-if="!data.edit">{{data.code}}</span>
+                            <input v-if="data.edit" type="text" class="form-control" v-model="data.code">
+                        </td>
+                        <td class="col">
+                            <span v-if="!data.edit">{{data.account}}</span>
+                            <input v-if="data.edit" type="text" class="form-control" v-model="data.account">
+                        </td>
+                        <td class="col">
+                            <span v-if="!data.edit">{{data.amount}}</span>
+                            <input v-if="data.edit" type="text" class="form-control" v-model="data.amount">
+                        </td>
+                        <td class="col">
+                            <span v-if="!data.edit">{{data.date_now}}</span>
+                            <input v-if="data.edit" type="text" class="form-control" v-model="data.date_now">
+                        </td>
+                        <td class="col">
+                            <span  v-if="!data.edit">{{data.vendor_name}}</span>
+                            <input v-if="data.edit" type="text" class="form-control" v-model="data.vendor_name">
+                        </td>
+                        <td class="col">
+                            <span v-if="!data.edit">{{data.effective_date}}</span>
+                            <input v-if="data.edit" type="text" class="form-control" v-model="data.effective_date">
+                        </td>
+                        <td>
+                            <span v-if="!data.edit">{{data.bene_ref}}</span>
+                            <input v-if="data.edit" type="text" class="form-control" v-model="data.bene_ref">
+                        </td>
+                        <td class="col">
+                            <span v-if="!data.edit">{{data.personal_id}}</span>
+                            <input v-if="data.edit" type="text" class="form-control" v-model="data.personal_id">
+                        </td>
+                        <td class="col">
+                            <button v-if="!data.edit" @click="editData(index)"class="btn btn-sm btn-warning">Edit</button>
+                            <button v-if="data.edit" @click="CancleData(index)"class="btn btn-sm btn-warning">Cancle</button>
+                            <button v-if="data.edit"@click="updateData(index)"class="btn btn-sm btn-success">save</button>
+                            <button v-if="data.edit" @click="deleteData(data.id)" class="btn btn-sm btn-danger">Delete</button>
+                        </td>
                     </tr>
                     
                 </tbody>
@@ -143,13 +191,16 @@
                             </thead>
                             <tbody>
                                 <tr v-for="(row, index) in rows" :key="index">
-                                    <td>{{ row.code }}</td>
+                                    <td>
+                                        <span>{{ row.code }}</span>
+                                        
+                                    </td>
                                     <td>{{ row.account }}</td>
                                     <td>{{ row.amount }}</td>
                                     <td>{{ row.date_now }}</td>
                                     <td>{{ row.vendor_name }}</td>
                                     <td>{{ row.effective_date }}</td>
-                                    <td>{{ row.bene_ref }}</td>
+                                    <td>{{ row.bene_ref}}</td>
                                     <td>{{ row.personal_id }}</td>
                                 </tr>
                             </tbody>
@@ -165,22 +216,24 @@
         
     </div>
 
-    <script>
+    <script>        
+
         new Vue({
             el: '#app',
             data: {
                 datas:[],
                 pagination: {
-            total: 0,
-            per_page: 10,
-            current_page: 1,
-            total_pages: 1,
-            next_page: null,
-            prev_page: null
-        },
+                    total: 0,
+                    per_page: 10,
+                    current_page: 1,
+                    total_pages: 1,
+                    next_page: null,
+                    prev_page: null
+                },
                 selectedFile: null,
                 rows: [],
-                header: {}
+                header: {},
+                editMode:false
 
             },
             created() {
@@ -212,7 +265,7 @@
                 uploadButton(){
                     this.resetData()
                 },
-                async getDatas(page = 1, per_page = 10) {
+                async getDatas(page = 1, per_page = 25) {
                     try {
                         const response = await axios.get(`./backend/financial_attorney_transactions?page=${page}&per_page=${per_page}`);
 
@@ -224,6 +277,7 @@
                             this.$refs['response'].innerHTML = `<p class="text-danger">${data.message}</p>`;
                         }
                     } catch (error) {
+                        this.datas = [];
                         this.$refs['response'].innerHTML = `<p class="text-danger">Error fetching data: ${error}</p>`;
                     }
                 },
@@ -273,13 +327,82 @@
                         const data = response.data;
                         if (data.status === 'success') {
                             this.$refs['response'].innerHTML = '<p class="text-success">Data Insert successfully</p>';
+                            this.getDatas()
                         } else {
                             this.$refs['response'].innerHTML = `<p class="text-danger">${data.message}</p>`;
                         }
                     } catch (error) {
                         this.$refs['response'].innerHTML = `<p class="text-danger">Error uploading file: ${error}</p>`;
                     }
+                },
+                async deleteData(id) {
+                    try {
+                        const result = await Swal.fire({
+                            title: 'Are you sure?',
+                            text: "You won't be able to revert this!",
+                            icon: 'warning',
+                            showCancelButton: true,
+                            confirmButtonColor: '#3085d6',
+                            cancelButtonColor: '#d33',
+                            confirmButtonText: 'Yes, delete it!'
+                        });
+
+                        if (result.isConfirmed) {
+                            const response = await axios.delete(`./backend/financial_attorney_transactions/${id}`);
+                            const data = response.data;
+
+                            if (data.status === 'success') {
+                                this.getDatas(this.pagination.current_page); // ดึงข้อมูลหน้าเดิมหลังจากลบข้อมูล
+                                this.$refs['response'].innerHTML = '<p class="text-success">Data deleted successfully</p>';
+                                Swal.fire(
+                                    'Deleted!',
+                                    'Your data has been deleted.',
+                                    'success'
+                                );
+                            } else {
+                                this.$refs['response'].innerHTML = `<p class="text-danger">${data.message}</p>`;
+                                Swal.fire(
+                                    'Error!',
+                                    data.message,
+                                    'error'
+                                );
+                            }
+                        }
+                    } catch (error) {
+                        this.$refs['response'].innerHTML = `<p class="text-danger">Error deleting data: ${error}</p>`;
+                        Swal.fire(
+                            'Error!',
+                            `Error deleting data: ${error}`,
+                            'error'
+                        );
+                    }
+                },
+
+                editData(idx){
+                    this.datas[idx].edit = true
+                },
+                CancleData(idx){
+                    this.datas[idx].edit = false
+                },
+                async updateData(idx){
+                    console.log(this.datas[idx])
+                    const id = this.datas[idx].id
+                    try {
+                        const response = await axios.put(`./backend/financial_attorney_transactions/${id}`,this.datas[idx]);
+
+                        const data = response.data;
+                        if (data.status === 'success') {
+                            this.getDatas(this.pagination.current_page); // ดึงข้อมูลหน้าเดิมหลังจากลบข้อมูล
+                            this.$refs['response'].innerHTML = '<p class="text-success">Data deleted successfully</p>';
+                        } else {
+                            this.$refs['response'].innerHTML = `<p class="text-danger">${data.message}</p>`;
+                        }
+                    } catch (error) {
+                        this.$refs['response'].innerHTML = `<p class="text-danger">Error deleting data: ${error}</p>`;
+                    }
                 }
+
+
             }
         });
     </script>

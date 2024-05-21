@@ -123,7 +123,7 @@ function getHeader($arr_lines) {
         $court = $arr_data[5];        
         $amount = $arr_data[3];
         $amount = intval($amount);
-        $amount = number_format($amount / 100, 2, '.', ',');
+        $amount = number_format($amount / 100, 0, '.', ',');
         $date_now = $arr_data[4];
         $date = DateTime::createFromFormat('ymd', $date_now);
         $date_now = $date->format('Y-m-d');
@@ -133,7 +133,7 @@ function getHeader($arr_lines) {
         $amount = $arr_data[2];
         $amount = substr($amount, 18, 19);
         $amount = intval($amount);
-        $amount = number_format($amount, 2, '.', ',');
+        $amount = number_format($amount, 0, '.', ',');
         $date_now = $arr_data[1];
         $date = DateTime::createFromFormat('d-m-Y', $date_now);
         $date_now = $date->format('Y-m-d');
@@ -143,7 +143,7 @@ function getHeader($arr_lines) {
         $amount = $arr_data[2];
         $amount = substr($amount, 18, 19);
         $amount = intval($amount);
-        $amount = number_format($amount, 2, '.', ',');
+        $amount = number_format($amount, 0, '.', ',');
         $date_now = $arr_data[1];
         $date = DateTime::createFromFormat('d-m-Y', $date_now);
         $date_now = $date->format('Y-m-d');
@@ -179,7 +179,7 @@ function getDatas($arr_lines, $header) {
         $account = $arr_lines[1];
         $amount = $arr_lines[2];
         $amount = intval($amount);
-        $amount = number_format($amount / 100, 2, '.', ',');
+        $amount = number_format($amount / 100, 0, '.', ',');
         $date_now = $arr_lines[3];
         $date = DateTime::createFromFormat('ymd', $date_now);
         $date_now = $date->format('Y-m-d');
@@ -208,7 +208,7 @@ function getDatas($arr_lines, $header) {
         $amount = $arr_lines[1];
         $amount = substr($amount, 0, 13);
         $amount = intval($amount);
-        $amount = number_format($amount, 2, '.', ',');
+        $amount = number_format($amount, 0, '.', ',');
         $vendor_name = substr($arr_lines[1], 13) . ' ' . $arr_lines[2];
         $personal_id = substr($personal_id, 0, 13);
 
@@ -228,7 +228,7 @@ function getDatas($arr_lines, $header) {
         $amount = $arr_lines[1];
         $amount = substr($amount, 0, 13);
         $amount = intval($amount);
-        $amount = number_format($amount, 2, '.', ',');
+        $amount = number_format($amount, 0, '.', ',');
         $vendor_name = substr($arr_lines[1], 13) . ' ' . $arr_lines[2];
         $personal_id = substr($personal_id, 0, 13);
     }

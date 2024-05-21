@@ -41,7 +41,9 @@ switch ($request_method) {
                     "effective_date" => $transaction->effective_date,
                     "bene_ref" => $transaction->bene_ref,
                     "personal_id" => $transaction->personal_id,
-                    "created" => $transaction->created
+                    "created" => $transaction->created,
+                    "updated" => $transaction->updated,
+                    "edit" => false
                 );
                 http_response_code(200);
                 echo json_encode($transaction_arr);
@@ -74,7 +76,9 @@ switch ($request_method) {
                         "effective_date" => $effective_date,
                         "bene_ref" => $bene_ref,
                         "personal_id" => $personal_id,
-                        "created" => $created
+                        "created" => $created,
+                        "updated" => $updated,
+                        "edit" => false
                     );
     
                     array_push($transactions_arr["records"], $transaction_item);
@@ -94,12 +98,13 @@ switch ($request_method) {
                     "next_page" => $page < $total_pages ? $page + 1 : null,
                     "prev_page" => $page > 1 ? $page - 1 : null
                 );
+               
     
                 http_response_code(200);
                 echo json_encode($transactions_arr);
             } else {
                 http_response_code(404);
-                echo json_encode(array("message" => "No transactions found."));
+                echo json_encode(array("status"=>"success","message" => "No transactions found."));
             }
         }
         break;
@@ -154,14 +159,14 @@ switch ($request_method) {
                 if (!empty($created_ids)) {
                     // ส่งข้อความยืนยันพร้อมกับ ID ล่าสุดที่สร้างขึ้น
                     http_response_code(201);
-                    echo json_encode(array("message" => "Transactions were created.", "last_inserted_ids" => $created_ids));
+                    echo json_encode(array("status"=>"success","message" => "Transactions were created.", "last_inserted_ids" => $created_ids));
                 } else {
                     http_response_code(503);
-                    echo json_encode(array("message" => "Unable to create transactions."));
+                    echo json_encode(array("status"=>"error","message" => "Unable to create transactions."));
                 }
             } else {
                 http_response_code(400);
-                echo json_encode(array("message" => "Unable to create transactions. No data received."));
+                echo json_encode(array("status"=>"error","message" => "Unable to create transactions. No data received."));
             }
         break;
         
@@ -204,14 +209,14 @@ switch ($request_method) {
 
             if ($transaction->update()) {
                 http_response_code(200);
-                echo json_encode(array("message" => "Transaction was updated.","data" => $data));
+                echo json_encode(array("status"=>"success","message" => "Transaction was updated.","data" => $data));
             } else {
                 http_response_code(503);
-                echo json_encode(array("message" => "Unable to update transaction."));
+                echo json_encode(array("status"=>"error","message" => "Unable to update transaction."));
             }
         } else {
             http_response_code(400);
-            echo json_encode(array("message" => "Unable to update transaction. Data is incomplete."));
+            echo json_encode(array("status"=>"error","message" => "Unable to update transaction. Data is incomplete."));
         }
         break;
 
@@ -226,20 +231,20 @@ switch ($request_method) {
             $transaction->id = intval($_GET['id']);
             if ($transaction->delete()) {
                 http_response_code(200);
-                echo json_encode(array("message" => "Transaction was deleted."));
+                echo json_encode(array("status"=>"success","message" => "Transaction was deleted."));
             } else {
                 http_response_code(503);
-                echo json_encode(array("message" => "Unable to delete transaction."));
+                echo json_encode(array("status"=>"error","message" => "Unable to delete transaction."));
             }
         } else {
             http_response_code(400);
-            echo json_encode(array("message" => "Unable to delete transaction. ID is missing."));
+            echo json_encode(array("status"=>"error","message" => "Unable to delete transaction. ID is missing."));
         }
         break;
 
     default:
         http_response_code(405);
-        echo json_encode(array("message" => "Method not allowed."));
+        echo json_encode(array("status"=>"error","message" => "Method not allowed."));
         break;
 }
 ?>

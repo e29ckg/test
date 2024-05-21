@@ -16,6 +16,7 @@ class FinancialAttorneyTransactions {
     public $bene_ref;
     public $personal_id;
     public $created;
+    public $updated;
 
     public function __construct($db) {
         $this->conn = $db;
@@ -23,7 +24,7 @@ class FinancialAttorneyTransactions {
 
     // Read transactions with pagination
     public function readPaginated($offset, $per_page) {
-        $query = "SELECT * FROM " . $this->table_name . " LIMIT ?, ?";
+        $query = "SELECT * FROM " . $this->table_name . " ORDER BY created DESC LIMIT ?, ?";
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(1, $offset, PDO::PARAM_INT);
         $stmt->bindParam(2, $per_page, PDO::PARAM_INT);
@@ -41,7 +42,7 @@ class FinancialAttorneyTransactions {
     }
 
     public function read() {
-        $query = "SELECT * FROM " . $this->table_name;
+        $query = "SELECT * FROM " . $this->table_name ."ORDER BY created DESC";
         $stmt = $this->conn->prepare($query);
         $stmt->execute();
         return $stmt;
@@ -118,19 +119,18 @@ class FinancialAttorneyTransactions {
         return false;
     }
 
-    function update() {
+    public function update() {
         $query = "UPDATE " . $this->table_name . "
                   SET
-                    code_pf = :code_pf, version = :version, codeH = :codeH, code = :code,
-                    account = :account, amount = :amount, date_now = :date_now,
-                    vendor_name = :vendor_name, effective_date = :effective_date,
-                    bene_ref = :bene_ref, personal_id = :personal_id
-                  WHERE id = :id";
+                    code_pf=:code_pf, version=:version, codeH=:codeH, code=:code,
+                    account=:account, amount=:amount, date_now=:date_now,
+                    vendor_name=:vendor_name, effective_date=:effective_date,
+                    bene_ref=:bene_ref, personal_id=:personal_id, updated=CURRENT_TIMESTAMP
+                  WHERE
+                    id = :id";
 
         $stmt = $this->conn->prepare($query);
 
-        // Clean data
-        $this->id = htmlspecialchars(strip_tags($this->id));
         $this->code_pf = htmlspecialchars(strip_tags($this->code_pf));
         $this->version = htmlspecialchars(strip_tags($this->version));
         $this->codeH = htmlspecialchars(strip_tags($this->codeH));
@@ -142,9 +142,8 @@ class FinancialAttorneyTransactions {
         $this->effective_date = htmlspecialchars(strip_tags($this->effective_date));
         $this->bene_ref = htmlspecialchars(strip_tags($this->bene_ref));
         $this->personal_id = htmlspecialchars(strip_tags($this->personal_id));
+        $this->id = htmlspecialchars(strip_tags($this->id));
 
-        // Bind values
-        $stmt->bindParam(':id', $this->id);
         $stmt->bindParam(":code_pf", $this->code_pf);
         $stmt->bindParam(":version", $this->version);
         $stmt->bindParam(":codeH", $this->codeH);
@@ -156,8 +155,8 @@ class FinancialAttorneyTransactions {
         $stmt->bindParam(":effective_date", $this->effective_date);
         $stmt->bindParam(":bene_ref", $this->bene_ref);
         $stmt->bindParam(":personal_id", $this->personal_id);
+        $stmt->bindParam(":id", $this->id);
 
-        // Execute query
         if ($stmt->execute()) {
             return true;
         }
