@@ -22,12 +22,44 @@ class FinancialAttorneyTransactions {
         $this->conn = $db;
     }
     
-    // Read transactions with pagination
-    public function readPaginated($offset, $per_page) {
-        $query = "SELECT * FROM " . $this->table_name . " ORDER BY created DESC LIMIT ?, ?";
+    
+   public function countAll($search) {
+        // กำหนดเงื่อนไขการค้นหา
+        $searchQuery = "";
+        if ($search) {
+            $searchQuery = "WHERE code LIKE :search OR account LIKE :search OR bene_ref LIKE :search OR vendor_name LIKE :search OR personal_id LIKE :search";
+        }
+
+        // นับจำนวนข้อมูลทั้งหมด
+        $query = "SELECT COUNT(*) as total FROM ".$this->table_name ." ". $searchQuery.";";
         $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(1, $offset, PDO::PARAM_INT);
-        $stmt->bindParam(2, $per_page, PDO::PARAM_INT);
+
+        if ($search) {
+            $stmt->bindValue(':search', "%$search%", PDO::PARAM_STR);
+        }
+
+        $stmt->execute();
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $row['total'];
+    }
+
+    // ฟังก์ชันเพื่อดึงข้อมูลตามหน้าและการค้นหา
+    public function readPaginated($offset, $per_page, $search) {
+        // กำหนดเงื่อนไขการค้นหา
+        $searchQuery = "";
+        if ($search) {
+            $searchQuery = "WHERE codeH LIKE :search OR code LIKE :search OR account LIKE :search OR vendor_name LIKE :search OR personal_id LIKE :search";
+        }
+
+        // ดึงข้อมูลตามหน้าและการค้นหา
+        $query = "SELECT * FROM financial_attorney_transactions $searchQuery LIMIT :offset, :per_page";
+        $stmt = $this->conn->prepare($query);
+
+        if ($search) {
+            $stmt->bindValue(':search', "%$search%", PDO::PARAM_STR);
+        }
+        $stmt->bindParam(":offset", $offset, PDO::PARAM_INT);
+        $stmt->bindParam(":per_page", $per_page, PDO::PARAM_INT);
         $stmt->execute();
         return $stmt;
     }

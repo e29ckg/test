@@ -17,14 +17,6 @@ $transaction = new FinancialAttorneyTransactions($db);
 $request_method = $_SERVER["REQUEST_METHOD"];
 switch ($request_method) {
     case 'GET':
-        // กำหนดค่าเริ่มต้นสำหรับการแบ่งหน้า
-        $page = isset($_GET['page']) ? intval($_GET['page']) : 1;
-        $per_page = isset($_GET['per_page']) ? intval($_GET['per_page']) : 10;
-        
-    
-        // คำนวณค่า offset สำหรับ SQL Query
-        $offset = ($page - 1) * $per_page;
-    
         if (isset($_GET['id'])) {
             $transaction->id = intval($_GET['id']);
             $transaction->readOne();
@@ -50,20 +42,27 @@ switch ($request_method) {
                 echo json_encode($transaction_arr);
             } else {
                 http_response_code(404);
-                echo json_encode(array("message" => "Transaction not found."));
+                echo json_encode(array("status" => "error", "message" => "Transaction not found."));
             }
         } else {
-            // อ่านข้อมูลการแบ่งหน้า
-            $stmt = $transaction->readPaginated($offset, $per_page);
+            // Pagination parameters
+            $page = isset($_GET['page']) ? intval($_GET['page']) : 1;
+            $per_page = isset($_GET['per_page']) ? intval($_GET['per_page']) : 10;
+            $search = isset($_GET['search']) ? $_GET['search'] : '';
+
+            // Calculate offset
+            $offset = ($page - 1) * $per_page;
+
+            $stmt = $transaction->readPaginated($offset, $per_page, $search);
             $num = $stmt->rowCount();
-    
+
             if ($num > 0) {
                 $transactions_arr = array();
                 $transactions_arr["records"] = array();
-    
+
                 while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
                     extract($row);
-    
+
                     $transaction_item = array(
                         "id" => $id,
                         "code_pf" => $code_pf,
@@ -81,16 +80,14 @@ switch ($request_method) {
                         "updated" => $updated,
                         "edit" => false
                     );
-    
+
                     array_push($transactions_arr["records"], $transaction_item);
                 }
-    
-                // อ่านจำนวนรายการทั้งหมด
-                $total_rows = $transaction->count();
-    
-                // คำนวณจำนวนหน้าทั้งหมด
+
+                // Get total rows for pagination
+                $total_rows = $transaction->countAll($search);
                 $total_pages = ceil($total_rows / $per_page);
-    
+
                 $transactions_arr["pagination"] = array(
                     "total" => $total_rows,
                     "per_page" => $per_page,
@@ -99,18 +96,15 @@ switch ($request_method) {
                     "next_page" => $page < $total_pages ? $page + 1 : null,
                     "prev_page" => $page > 1 ? $page - 1 : null
                 );
-               
-    
+
                 http_response_code(200);
                 echo json_encode($transactions_arr);
             } else {
                 http_response_code(404);
-                echo json_encode(array("status"=>"success","message" => "No transactions found."));
+                echo json_encode(array("status" => "success", "message" => "No transactions found."));
             }
         }
         break;
-    
-    
 
         case 'POST':
             // ตรวจสอบการรับรองตัวตนก่อนดำเนินการ

@@ -33,7 +33,7 @@ CREATE TABLE `financial_attorney_transactions` (
   `codeH` varchar(50) NOT NULL,
   `code` varchar(50) NOT NULL,
   `account` varchar(50) NOT NULL,
-  `amount` decimal(10,2) NOT NULL,
+  `amount` varchar(50) NOT NULL,
   `date_now` date NOT NULL,
   `vendor_name` varchar(100) NOT NULL,
   `effective_date` date NOT NULL,

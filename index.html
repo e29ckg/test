@@ -7,6 +7,7 @@
     <link href="./css/bootstrap.min.css" rel="stylesheet">
     <link href="./css/font_sarabun.css" rel="stylesheet">    
     <link href="./node_modules/sweetalert2/dist/sweetalert2.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="./css/bootstrap-icons.min.css">
     <script src="./js/vue.min.js"></script>
     <script src="./js/axios.min.js"></script>
     <script src="./node_modules/sweetalert2/dist/sweetalert2.min.js"></script>
@@ -41,29 +42,38 @@
     <div id="app" class="container">
         <nav class="navbar navbar-expand-lg navbar-light bg-light">
             <div class="container-fluid">
-            <a class="navbar-brand" href="#">Home</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                
-                </ul>
-                <ul class="navbar-nav mb-2 mb-lg-0">
-                    
-                    <li> 
-                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#uploadModal" @click="uploadButton()">
-                            Upload File
-                        </button>
-                    </li>
-                </ul>
-                
-            </div>
+                <a class="navbar-brand" href="#">Home</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                        <!-- Add any other navigation items here -->
+                    </ul>
+                    <ul class="navbar-nav mb-2 mb-lg-0 d-flex align-items-center">
+                        <li class="nav-item me-3">
+                            <div class="input-group">
+                                <input type="text" class="form-control" v-model="searchQuery" placeholder="ค้นหา" aria-label="Search" aria-describedby="basic-addon2">
+                                <button class="btn btn-outline-secondary" type="button" id="basic-addon2" @click="searchData">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
+                                        <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        </li>
+                        <li class="nav-item">
+                            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#uploadModal" @click="uploadButton">
+                                Upload File
+                            </button>
+                        </li>
+                    </ul>
+                </div>
             </div>
         </nav>
+        
         <section>
             
-            <table id="data-table-main" class="table table-bordered table-striped mt-3">            
+            <table id="data-table-main" class="table table-bordered table-striped mt-3">
                 <thead>
                     <tr>
                         <th colspan="9" class="text-center" id="h-court">Details</th>
@@ -75,15 +85,14 @@
                         <th>Amount</th>
                         <th>Date</th>
                         <th>Vendor Name</th>
-                        <th >Effective Date</th>
+                        <th>Effective Date</th>
                         <th>Bene Ref</th>
                         <th>Personal ID</th>
                         <th>Action</th>
                     </tr>
                 </thead>
                 <tbody class="text-sm-start">
-
-                    <tr v-for="(data, index) in datas" :key="index">                        
+                    <tr v-for="(data, index) in datas" :key="index">
                         <!-- <td class="col">
                             <span v-if="!data.edit">{{data.codeH}}</span>
                             <input v-if="data.edit" type="text" class="form-control" v-model="data.codeH">
@@ -105,7 +114,7 @@
                             <input v-if="data.edit" type="text" class="form-control" v-model="data.date_now">
                         </td>
                         <td class="col">
-                            <span  v-if="!data.edit">{{data.vendor_name}}</span>
+                            <span v-if="!data.edit">{{data.vendor_name}}</span>
                             <input v-if="data.edit" type="text" class="form-control" v-model="data.vendor_name">
                         </td>
                         <td class="col">
@@ -121,15 +130,15 @@
                             <input v-if="data.edit" type="text" class="form-control" v-model="data.personal_id">
                         </td>
                         <td class="col">
-                            <button v-if="!data.edit" @click="editData(index)"class="btn btn-sm btn-warning">Edit</button>
-                            <button v-if="data.edit" @click="CancleData(index)"class="btn btn-sm btn-warning">Cancle</button>
-                            <button v-if="data.edit"@click="updateData(index)"class="btn btn-sm btn-success">save</button>
-                            <button v-if="data.edit" @click="deleteData(data.id)" class="btn btn-sm btn-danger">Delete</button>
+                            <button v-if="!data.edit" @click="editData(index)" class="btn btn-sm btn-warning">Edit</button>
+                            <button v-if="data.edit" @click="CancleData(index)" class="btn btn-sm btn-warning">Cancel</button>
+                            <button v-if="data.edit" @click="updateData(index)" class="btn btn-sm btn-success">Save</button>
+                            <button @click="deleteData(data.id)" class="btn btn-sm btn-danger">Delete</button>
                         </td>
                     </tr>
-                    
                 </tbody>
             </table>
+            
             <div>
                 <button @click="getDatas(pagination.prev_page)" :disabled="!pagination.prev_page">Previous</button>
                 <span>Page {{ pagination.current_page }} of {{ pagination.total_pages }}</span>
@@ -150,8 +159,8 @@
                     <div class="modal-body">
                         <div class="mb-3">
                             <label for="file" class="form-label">Choose a text file to upload or drag it here:</label>
-                            <input type="file" name="file" id="file" accept=".txt" class="form-control" style="display: none;" @change="handleFileChange">
-                            <div id="drag-drop-area" ref="drag-drop-area" class="drag-drop" @dragover.prevent @dragenter.prevent @dragleave.prevent @drop.prevent="handleDrop" @click="triggerFileInput">
+                            <input type="file" name="file" id="file" accept=".txt" class="form-control" style="display: none;" ref="fileInput" @change="handleFileChange">
+                            <div id="drag-drop-area" ref="drag-drop-area" class="drag-drop"  @dragover.prevent @dragenter.prevent @dragleave.prevent @drop.prevent="handleDrop" @click="triggerFileInput">
                                 Drag & Drop your file here
                             </div>
                             
@@ -263,23 +272,37 @@
                     this.rows = []
                     this.header = {}
                     this.$refs['response'].innerHTML = ''
+                    this.$refs.fileInput.value = null;
+                    this.$refs['drag-drop-area'].textContent = 'Drag & Drop your file here'
                 },
                 uploadButton(){
                     this.resetData()
                 },
                 async getDatas(page = 1, per_page = 10) {
                     try {
-                        const response = await axios.get(`./backend/financial_attorney_transactions?page=${page}&per_page=${per_page}`);
+                        const response = await axios.get(`./backend/financial_attorney_transactions?page=${page}&per_page=${per_page}&search=${this.searchQuery}`);
 
                         const data = response.data;
                         if (data.records) {
                             this.datas = data.records;
                             this.pagination = data.pagination;
                         } else {
-                            this.$refs['response'].innerHTML = `<p class="text-danger">${data.message}</p>`;
+                            this.datas = [];
+                            this.pagination.total= 0,
+                            this.pagination.per_page= 10,
+                            this.pagination.current_page= 1,
+                            this.pagination.total_pages= 1,
+                            this.pagination.next_page= null,
+                            this.pagination.prev_page= null
                         }
                     } catch (error) {
                         this.datas = [];
+                            this.pagination.total= 0,
+                            this.pagination.per_page= 10,
+                            this.pagination.current_page= 1,
+                            this.pagination.total_pages= 1,
+                            this.pagination.next_page= null,
+                            this.pagination.prev_page= null
                         this.$refs['response'].innerHTML = `<p class="text-danger">Error fetching data: ${error}</p>`;
                     }
                 },
@@ -402,8 +425,10 @@
                     } catch (error) {
                         this.$refs['response'].innerHTML = `<p class="text-danger">Error deleting data: ${error}</p>`;
                     }
+                },
+                async searchData() {
+                    this.getDatas(1); // ดึงข้อมูลหน้าแรกใหม่หลังจากการค้นหา
                 }
-                
 
 
             }
